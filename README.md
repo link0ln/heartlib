@@ -1,4 +1,4 @@
-# HeartMuLa Local API
+# HeartMuLa Local WEB-UI
 
 **Self-hosted HTTP API for HeartMuLa-oss-3B music generation with VRAM optimization**
 
