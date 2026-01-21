@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartMuLa - AI Music Generator</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">♪</span>
+                <span class="logo-text">HeartMuLa</span>
+            </div>
+
+            <nav class="nav">
+                <a href="#" class="nav-item active" data-tab="create">
+                    <span class="nav-icon">+</span>
+                    Create
+                </a>
+                <a href="#" class="nav-item" data-tab="library">
+                    <span class="nav-icon">♫</span>
+                    Library
+                </a>
+            </nav>
+
+            <!-- GPU Monitor -->
+            <div class="gpu-monitor">
+                <h3>GPU Status</h3>
+                <div class="gpu-stats">
+                    <div class="stat">
+                        <span class="stat-label">GPU</span>
+                        <span class="stat-value" id="gpu-name">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Utilization</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="gpu-util-bar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-value" id="gpu-util">0%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Memory</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="gpu-mem-bar" style="width: 0%"></div>
+                        </div>
+                        <span class="stat-value" id="gpu-mem">0 / 0 GB</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Temperature</span>
+                        <span class="stat-value" id="gpu-temp">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Power</span>
+                        <span class="stat-value" id="gpu-power">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="model-info">
+                    <span class="model-badge">HeartMuLa-3B</span>
+                    <span class="dtype-badge" id="model-dtype">FP16</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Create Tab -->
+            <div class="tab-content active" id="tab-create">
+                <div class="create-container">
+                    <h1>Create Music</h1>
+                    <p class="subtitle">Generate original songs with AI</p>
+
+                    <form id="generate-form" class="generate-form">
+                        <!-- Style/Tags -->
+                        <div class="form-group">
+                            <label for="tags">Style & Tags</label>
+                            <input type="text" id="tags" name="tags"
+                                   placeholder="pop, piano, happy, english, upbeat, female vocal"
+                                   value="pop, piano, happy, english">
+                            <div class="tag-suggestions">
+                                <span class="tag-chip" data-tag="pop">pop</span>
+                                <span class="tag-chip" data-tag="rock">rock</span>
+                                <span class="tag-chip" data-tag="jazz">jazz</span>
+                                <span class="tag-chip" data-tag="electronic">electronic</span>
+                                <span class="tag-chip" data-tag="piano">piano</span>
+                                <span class="tag-chip" data-tag="guitar">guitar</span>
+                                <span class="tag-chip" data-tag="happy">happy</span>
+                                <span class="tag-chip" data-tag="sad">sad</span>
+                                <span class="tag-chip" data-tag="energetic">energetic</span>
+                                <span class="tag-chip" data-tag="calm">calm</span>
+                                <span class="tag-chip" data-tag="male vocal">male vocal</span>
+                                <span class="tag-chip" data-tag="female vocal">female vocal</span>
+                                <span class="tag-chip" data-tag="english">english</span>
+                                <span class="tag-chip" data-tag="russian">russian</span>
+                            </div>
+                        </div>
+
+                        <!-- Lyrics -->
+                        <div class="form-group">
+                            <label for="lyrics">Lyrics</label>
+                            <textarea id="lyrics" name="lyrics" rows="10"
+                                      placeholder="[Verse]
+Write your lyrics here...
+
+[Chorus]
+Add a catchy chorus...
+
+[Bridge]
+Optional bridge section...">[Verse]
+Hello world, it's a beautiful day
+The sun is shining bright
+Birds are singing on their way
+Everything feels just right
+
+[Chorus]
+Sing along with me
+Let the music set you free
+Feel the rhythm in your heart
+This is just the start</textarea>
+                        </div>
+
+                        <!-- Parameters -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="duration">Duration</label>
+                                <select id="duration" name="duration">
+                                    <option value="15000">15 seconds</option>
+                                    <option value="30000" selected>30 seconds</option>
+                                    <option value="60000">1 minute</option>
+                                    <option value="120000">2 minutes</option>
+                                    <option value="180000">3 minutes</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="temperature">Creativity: <span id="temp-value">1.0</span></label>
+                                <input type="range" id="temperature" name="temperature"
+                                       min="0.5" max="1.5" step="0.1" value="1.0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cfg_scale">Guidance: <span id="cfg-value">1.5</span></label>
+                                <input type="range" id="cfg_scale" name="cfg_scale"
+                                       min="1.0" max="3.0" step="0.1" value="1.5">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-generate" id="btn-generate">
+                            <span class="btn-icon">♪</span>
+                            Generate Music
+                        </button>
+                    </form>
+
+                    <!-- Current Generation -->
+                    <div class="generation-status" id="generation-status" style="display: none;">
+                        <div class="status-header">
+                            <h3>Generating...</h3>
+                            <span class="status-badge" id="status-badge">processing</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar large">
+                                <div class="progress-fill" id="generation-progress" style="width: 0%"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text">0%</span>
+                        </div>
+                        <div class="status-details">
+                            <span id="status-message">Initializing...</span>
+                        </div>
+                    </div>
+
+                    <!-- Result Player -->
+                    <div class="result-player" id="result-player" style="display: none;">
+                        <div class="player-header">
+                            <h3>Your Track</h3>
+                            <span class="player-duration" id="player-duration">0:00</span>
+                        </div>
+                        <div class="waveform" id="waveform"></div>
+                        <div class="player-controls">
+                            <button class="btn-play" id="btn-play">▶</button>
+                            <div class="player-timeline">
+                                <input type="range" id="player-seek" min="0" max="100" value="0">
+                                <span class="player-time" id="player-time">0:00 / 0:00</span>
+                            </div>
+                            <button class="btn-download" id="btn-download">↓ Download</button>
+                        </div>
+                        <audio id="audio-player"></audio>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Library Tab -->
+            <div class="tab-content" id="tab-library">
+                <div class="library-container">
+                    <h1>Your Library</h1>
+                    <p class="subtitle">Previously generated tracks</p>
+
+                    <div class="library-grid" id="library-grid">
+                        <!-- Tracks will be loaded here -->
+                    </div>
+
+                    <div class="empty-state" id="empty-library">
+                        <span class="empty-icon">♫</span>
+                        <p>No tracks yet. Create your first song!</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

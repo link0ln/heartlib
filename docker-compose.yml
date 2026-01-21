@@ -1,0 +1,48 @@
+services:
+  heartmula-api:
+    build: .
+    container_name: heartmula-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ckpt:/app/ckpt:ro          # Model files (read-only)
+      - ./outputs:/app/outputs        # Generated audio files
+    environment:
+      - HEARTMULA_MODEL_DTYPE=float16
+      - HEARTMULA_HYBRID_MODE=false
+      - HEARTMULA_SEQUENTIAL_OFFLOAD=true  # Swap models GPU<->CPU during generation
+      - HEARTMULA_REDIS_URL=redis://redis:6379
+      - HEARTMULA_MODEL_PATH=/app/ckpt
+      - HEARTMULA_OUTPUT_PATH=/app/outputs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  redis:
+    image: redis:7-alpine
+    container_name: heartmula-redis
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  redis-data:
